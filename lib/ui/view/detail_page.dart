@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kisiler_uygulamasi/data/entity/person.dart';
 import 'package:kisiler_uygulamasi/ui/Cubits/DetailPageCubit.dart';
+import 'package:kisiler_uygulamasi/ui/view/home_page.dart';
 
 class PersonDetail extends StatefulWidget {
 
@@ -42,6 +43,7 @@ class _PersonDetailState extends State<PersonDetail> {
               TextField(controller: tfPersonPhone,decoration: InputDecoration(hintText: "Person Phone Number"),),
               ElevatedButton(onPressed:(){
                 context.read<DetailPageCubit>().update(widget.person.person_id, tfPersonName.text, tfPersonPhone.text);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
               }, child: const Text("Update"))
             ],
           ),

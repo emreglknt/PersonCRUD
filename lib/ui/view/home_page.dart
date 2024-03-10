@@ -110,7 +110,7 @@ class _HomePageState extends State<HomePage> {
         onPressed: (){
           Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterPerson()))
               .then((value) {
-            print("anasayfaya dönüldü");
+            context.read<HomePageCubit>().personLoad();
           });
         },
         child: const Icon(Icons.add),
