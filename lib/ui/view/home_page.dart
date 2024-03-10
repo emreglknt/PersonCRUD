@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kisiler_uygulamasi/data/entity/person.dart';
-import 'package:kisiler_uygulamasi/ui/detail_page.dart';
-import 'package:kisiler_uygulamasi/ui/kayit_page.dart';
+import 'package:kisiler_uygulamasi/ui/Cubits/HomePageCubit.dart';
+import 'package:kisiler_uygulamasi/ui/view/detail_page.dart';
+import 'package:kisiler_uygulamasi/ui/view/kayit_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,32 +17,13 @@ class _HomePageState extends State<HomePage> {
   bool searchcontrol = false;
 
 
-  Future<void> search(String searchQuery) async{
-    print("search person : $searchQuery");
+
+
+@override
+  void initState() {
+    super.initState();
+    context.read<HomePageCubit>().personLoad(); //sayfa açıldığı anda cubitteki kişileri yükle fonksiyonu çalıştır.
   }
-
-
-  Future<void> deletePerson(int person_id) async{
-    print("Deleted Person: $person_id");
-  }
-
-
-
-  Future<List<Person>> personLoad() async{
-    var listPerson = <Person>[];
-    var p1 = Person(person_id: 1, person_name: "Emre", person_phone: "05319845130");
-    var p2 = Person(person_id: 2, person_name:"mehmet", person_phone:"05312657895");
-    var p3 = Person(person_id: 3, person_name: "poyraz", person_phone:"05426551915");
-    var p4 = Person(person_id: 3, person_name: "ahmet", person_phone:"05426531918");
-    var p5 = Person(person_id: 3, person_name: "toprak", person_phone:"05426537925");
-    listPerson.add(p1);
-    listPerson.add(p2);
-    listPerson.add(p3);
-    listPerson.add(p4);
-    listPerson.add(p5);
-    return listPerson;
-  }
-
 
 
 
@@ -49,7 +32,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(title: searchcontrol ? TextField(decoration:InputDecoration(hintText: "search") ,
         onChanged: (searchResult){
-          search(searchResult);
+          context.read<HomePageCubit>().search(searchResult);
         },
       ):
       const Text("Person"),
@@ -59,6 +42,7 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             searchcontrol =false;
           });
+          context.read<HomePageCubit>().personLoad();
         },icon: Icon(Icons.clear)):
 
         IconButton(onPressed: (){
@@ -70,15 +54,13 @@ class _HomePageState extends State<HomePage> {
       ),
 
 
-      body: FutureBuilder<List<Person>>(
-        future: personLoad(),
-        builder: (context,snapshot){
-          if(snapshot.hasData && snapshot.data != null){
-              var personlist = snapshot.data;
+      body:BlocBuilder<HomePageCubit,List<Person>>( //emit ile gelen veriyi dinledik.
+        builder: (context,personlist){
+          if(personlist.isNotEmpty){ // emit ile gelen liste boş değilse
               return ListView.builder(
-                itemCount: personlist?.length,  // personlist, snapshot.data'dan gelen verileri içerir.
+                itemCount: personlist.length,
                 itemBuilder: (context, index) {
-                  var person = personlist![index];  // Her bir person nesnesini alır.
+                  var person = personlist[index];  // Her bir person nesnesini alır.
                   return GestureDetector(
                     onTap: (){
                       Navigator.push(context, MaterialPageRoute(builder: (context) => PersonDetail(person: person)))
@@ -106,7 +88,7 @@ class _HomePageState extends State<HomePage> {
                                   action:  SnackBarAction(
                                     label: "Yes",
                                     onPressed: (){
-                                      deletePerson(person.person_id);
+                                      context.read<HomePageCubit>().deletePerson(person.person_id);
                                       },
                                   ),
                               )

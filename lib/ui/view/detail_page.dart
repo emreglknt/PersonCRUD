@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kisiler_uygulamasi/data/entity/person.dart';
+import 'package:kisiler_uygulamasi/ui/Cubits/DetailPageCubit.dart';
 
 class PersonDetail extends StatefulWidget {
 
@@ -16,10 +18,6 @@ class _PersonDetailState extends State<PersonDetail> {
   var tfPersonName = TextEditingController();
   var tfPersonPhone = TextEditingController();
 
-  //update işlemini asenkron olarak yapmamızı sağlar  Future - async
-  Future<void> update(int person_id,String person_name,String person_phone) async{
-    print("Person Update : $person_id - $person_name - $person_phone");
-  }
 
 
   // anasayafan gelen verideki name ve phonu textfieldlara ekran açıldığında yerleştirir.
@@ -43,7 +41,7 @@ class _PersonDetailState extends State<PersonDetail> {
               TextField(controller: tfPersonName,decoration:  InputDecoration(hintText: "Person Name"),),
               TextField(controller: tfPersonPhone,decoration: InputDecoration(hintText: "Person Phone Number"),),
               ElevatedButton(onPressed:(){
-                update(widget.person.person_id,tfPersonName.text,tfPersonPhone.text);
+                context.read<DetailPageCubit>().update(widget.person.person_id, tfPersonName.text, tfPersonPhone.text);
               }, child: const Text("Update"))
             ],
           ),
