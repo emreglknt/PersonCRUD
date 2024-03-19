@@ -42,7 +42,7 @@ class _PersonDetailState extends State<PersonDetail> {
               TextField(controller: tfPersonName,decoration:  InputDecoration(hintText: "Person Name"),),
               TextField(controller: tfPersonPhone,decoration: InputDecoration(hintText: "Person Phone Number"),),
               ElevatedButton(onPressed:(){
-                context.read<DetailPageCubit>().update(widget.person.person_id, tfPersonName.text, tfPersonPhone.text);
+                context.read<DetailPageCubit>().update(int.parse(widget.person.person_id), tfPersonName.text, tfPersonPhone.text);
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
               }, child: const Text("Update"))
             ],

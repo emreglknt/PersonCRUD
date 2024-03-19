@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
                                   action:  SnackBarAction(
                                     label: "Yes",
                                     onPressed: (){
-                                      context.read<HomePageCubit>().deletePerson(person.person_id);
+                                      context.read<HomePageCubit>().deletePerson(int.parse(person.person_id));
                                       },
                                   ),
                               )

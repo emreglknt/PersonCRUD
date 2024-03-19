@@ -1,66 +1,67 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:kisiler_uygulamasi/data/entity/person.dart';
-import 'package:kisiler_uygulamasi/sqlite/database_builder.dart';
+import 'package:kisiler_uygulamasi/data/entity/personResponse.dart';
 
 class PersonDaoRepository{
 
-  // Register
-  Future<void> register(String person_name,String person_phone) async{
-    var db = await DataBaseBuilder.veritabaniErisim();
-    var newPerson = Map<String,dynamic>();
-    newPerson["p_name"] = person_name;//tablolardaki taglere göre alınan name ve phone aktar
-    newPerson["p_phone"] = person_phone; //idsi otomatik oluşacak.
-    await db.insert("persons", newPerson); // db ye bu değişkeni insert et.
 
+
+  List<Person> parsePerson(String response){
+    return PersonResponse.fromJson(json.decode(response)).person;
+  }
+
+
+
+
+  Future<List<Person>> personLoad() async{
+    var baseurl = "http://kasimadalan.pe.hu/kisiler/tum_kisiler.php";
+    var response = await Dio().get(baseurl);
+    return parsePerson(response.data.toString());
+
+  }
+
+
+
+  // Add person
+  Future<void> register(String person_name,String person_phone) async{
+    var baseurl = "http://kasimadalan.pe.hu/kisiler/insert_kisiler.php";
+    var veri = {"kisi_ad":person_name,"kisi_tel":person_phone};
+    var response = await Dio().post(baseurl,data: FormData.fromMap(veri));
+    print("kisi kaydet : ${response.data.toString()}");
   }
 
 
   //UPDATE işlemini asenkron olarak yapmamızı sağlar  Future - async
   Future<void> update(int person_id,String person_name,String person_phone) async{
-    var db = await DataBaseBuilder.veritabaniErisim();
-    var updatedPerson = Map<String,dynamic>();
-    updatedPerson["p_name"] = person_name;//tablolardaki taglere göre alınan name ve phone aktar
-    updatedPerson["p_phone"] = person_phone; //idsi otomatik oluşacak.
-    //gelen id deki person ı yeni değerlerle persons table ında db de güncelle.
-    await db.update("persons", updatedPerson,where:"p_id = ?",whereArgs: [person_id]);
-
+    var baseurl = "http://kasimadalan.pe.hu/kisiler/update_kisiler.php";
+    var veri = {"kisi_id":person_id,"kisi_ad":person_name,"kisi_tel":person_phone};
+    var response = await Dio().post(baseurl,data: FormData.fromMap(veri));
+    print("kisi güncelle : ${response.data.toString()}");
   }
 
 
 
-  Future<List<Person>> personLoad() async{
-    var db = await DataBaseBuilder.veritabaniErisim();
-    //değişebilir bir tür olduğundan dynamic kullandık.
-    List<Map<String,dynamic>> maps = await db.rawQuery("select * from persons");
-
-    return List.generate(maps.length, (index) {
-      var row = maps[index]; // db deki kişi tableında ilk satır alındı.
-
-      //kaç tane row varsa (kişi kayıtı dbde ) table name tagleri ile değerlerini alarak  person nesneslerini oluşturur.
-      return Person(person_id: row["p_id"], person_name: row["p_name"], person_phone: row["p_phone"]);
-
-    });
-
-  }
 
 
   //SEARCH
   //aranan kelimeye göre dbdeki satırları bulur ve maps içine atar
   // kaç adet o kelimeden kayıt varsa liste halinde bize verir.
   Future<List<Person>> search(String searchQuery) async{
-    var db = await DataBaseBuilder.veritabaniErisim();
-    List<Map<String,dynamic>> maps = await db.rawQuery("select * from persons WHERE p_name like '%$searchQuery%' ");
-    return List.generate(maps.length, (index)
-    {
-      var row = maps[index];
-      return Person(person_id: row["p_id"], person_name: row["p_name"], person_phone: row["p_phone"]);
-    });
+    var baseurl = "http://kasimadalan.pe.hu/kisiler/tum_kisiler_arama.php";
+    var veri = {"kisi_ad":searchQuery};
+    var response = await Dio().post(baseurl,data: FormData.fromMap(veri));
+    return parsePerson(response.data.toString());
   }
 
 
   //DELETE
   Future<void> deletePerson(int person_id) async{
-    var db = await DataBaseBuilder.veritabaniErisim();
-    await db.delete("persons",where:"p_id = ?",whereArgs: [person_id]);
+    var baseurl = "http://kasimadalan.pe.hu/kisiler/delete_kisiler.php";
+    var veri = {"kisi_id":person_id};
+    var response = await Dio().post(baseurl,data: FormData.fromMap(veri));
+    print("kisi sil : ${response.data.toString()}");
 
   }
 
